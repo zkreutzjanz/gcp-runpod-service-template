@@ -1,5 +1,5 @@
 # What is this?
-This is a template repository for creating a runpod service that works on both pods and serverless.
+This is a template repository for creating a runpod service that works on both pods and serverless. Still have to git clone in runpod pod when init, but this is meant for network volumes as well.
 
 # What is required?
 1. Google cloud sdk installed
