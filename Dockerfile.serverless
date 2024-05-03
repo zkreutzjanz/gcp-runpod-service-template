@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=ubuntu:latest
+
+FROM ${BASE_IMAGE}
+
+# Copy your Python script
+COPY . /app
+
+# Ensure the script is executable
+RUN chmod +x /app/handler.py
+
+# The path to the Conda executable
+ENV PATH /opt/miniconda/bin:$PATH
+
+# Command to activate the Conda environment and run your script
+CMD ["/bin/bash", "-c", "source activate conda_env && python -u /app/handler.py"]
+
+

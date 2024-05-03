@@ -1,0 +1,66 @@
+steps:
+  ## login to docker
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker login --username=$$USERNAME --password=$$PASSWORD']
+    secretEnv: ['USERNAME', 'PASSWORD']
+
+  ## pull the latest cache, build and push the new images
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull $$USERNAME/$_DOCKER_REPOSITORY:latest || true']
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: 
+      - '-c'
+      - |
+         docker build \
+           --cache-from $$USERNAME/$_DOCKER_REPOSITORY:latest \
+           -t $$USERNAME/$_DOCKER_REPOSITORY:latest \
+           -t $$USERNAME/$_DOCKER_REPOSITORY:$COMMIT_SHA .
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push $$USERNAME/$_DOCKER_REPOSITORY:latest']
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push $$USERNAME/$_DOCKER_REPOSITORY:$COMMIT_SHA']
+    secretEnv: ['USERNAME']
+
+  ## pull the latest cache, build and push the new serverless images
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull $$USERNAME/$_DOCKER_REPOSITORY:latest-serverless || true']
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: 
+      - '-c'
+      - |
+         docker build \
+            --build-arg BASE_IMAGE=$$USERNAME/$_DOCKER_REPOSITORY:latest \
+           --cache-from $$USERNAME/$_DOCKER_REPOSITORY:latest-serverless \
+           -t $$USERNAME/$_DOCKER_REPOSITORY:latest-serverless \
+           -t $$USERNAME/$_DOCKER_REPOSITORY:$COMMIT_SHA-serverless \
+           -f Dockerfile.serverless .
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push $$USERNAME/$_DOCKER_REPOSITORY:latest-serverless']
+    secretEnv: ['USERNAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push $$USERNAME/$_DOCKER_REPOSITORY:$COMMIT_SHA-serverless']
+    secretEnv: ['USERNAME']
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_NUMBER/secrets/$_DOCKER_PASSWORD_SECRET_NAME/versions/latest
+      env: 'PASSWORD'
+    - versionName: projects/$PROJECT_NUMBER/secrets/$_DOCKER_USERNAME_SECRET_NAME/versions/latest
+      env: 'USERNAME'
+
+options:
+  machineType: 'E2_HIGHCPU_32'

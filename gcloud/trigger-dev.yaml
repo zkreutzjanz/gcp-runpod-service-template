@@ -1,0 +1,16 @@
+name: runpod-service-template-trigger-dev
+description: Trigger build/deploy for dev
+filename: /gcloud/cloudbuild.yaml
+github:
+  owner: zkreutzjanz
+  name: runpod-service-template-gcp
+  push:
+    branch: ^dev$
+substitutions:
+  _REGION: us-central1
+  _SERVICE_NAME: runpod-service-template
+  _SERVICE_CONFIG: runpod-service-template-config-dev
+  _DOCKER_REPOSITORY: 'runpod-service-template-dev'
+  _DOCKER_PASSWORD_SECRET_NAME: 'ivt-docker-password-secret-dev-secret'
+  _DOCKER_USERNAME_SECRET_NAME: 'ivt-docker-username-secret-dev-secret'
+  
